@@ -21,7 +21,7 @@ app.config.suppress_callback_exceptions = True
 app.layout = html.Div([
     html.Div([
         html.Div([
-            html.Div(id='live-thermometer', style={'color':'green', 'font-size': 40, 'font-family':'sans-serif'})
+            html.Div(id='live-thermometer', style={'color':'green', 'font-size': 30, 'font-family':'sans-serif'})
         ],
             className='four columns'
         ),
