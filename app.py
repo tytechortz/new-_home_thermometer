@@ -21,7 +21,26 @@ app.config.suppress_callback_exceptions = True
 app.layout = html.Div([
     html.Div([
         html.Div([
-            html.Div(id='live-thermometer', style={'color':'green', 'font-size': 30, 'font-family':'sans-serif'})
+            html.Div([
+                html.Div(id='live-thermometer', style={'color':'green', 'font-size': 30, 'font-family':'sans-serif'}),
+                html.H6('Today', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div([
+                   html.Div(id='daily-high', style={'color':'red', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                   html.Div(id='daily-low', style={'color':'dodger-blue', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+            ],
+                className='row'
+            ),
         ],
             className='four columns'
         ),
@@ -54,6 +73,18 @@ app.layout = html.Div([
     dcc.Store(id='y2020', storage_type='session'),
     dcc.Store(id='y2021', storage_type='session'),
 ])
+
+@app.callback([
+    Output('daily-high', 'children'),
+    Output('daily-low', 'children')],
+    [Input('interval-component-graph', 'n_intervals'),
+    Input('daily-data', 'data')])
+def update_daily_stats(n, daily_data):
+    daily_df = pd.read_json(daily_data)
+    daily_max = daily_df[1].max()
+    daily_min = daily_df[1].min()
+
+    return html.H5('High: {:.1f}'.format(daily_max)), html.H5('Low: {:.1f}'.format(daily_min))
 
 @app.callback(Output('live-thermometer', 'children'),
               [Input('interval-component', 'n_intervals')])
@@ -226,7 +257,10 @@ def update_graph(n, daily_data, y2018, y2019, y2020, y2021):
     ]
     layout = go.Layout(
         xaxis=dict(tickformat='%H%M'),
-        height=500
+        height=500,
+        paper_bgcolor="#1f2630",
+        plot_bgcolor="#1f2630",
+        font=dict(color="#2cfec1"),
     )
     return {'data': data, 'layout': layout}
 
