@@ -9,6 +9,9 @@ import pandas as pd
 
 url = "http://10.0.1.7:8080"
 
+
+# print(today)
+
 app = Dash(name=__name__, 
                 title="Environmental Data Dashboard",
                 assets_folder="static",
@@ -41,6 +44,44 @@ app.layout = html.Div([
             ],
                 className='row'
             ),
+            html.Div([
+                html.H6('Ranks', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div([
+                   html.Div(id='daily-high-high-rank', style={'color':'red', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                   html.Div(id='daily-low-low-rank', style={'color':'dodger-blue', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div([
+                   html.Div(id='daily-high-low-rank', style={'color':'red', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                   html.Div(id='daily-low-high-rank', style={'color':'dodger-blue', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.H6('Yesterday', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
         ],
             className='four columns'
         ),
@@ -67,12 +108,54 @@ app.layout = html.Div([
         interval=900000,
         n_intervals=0
     ),
-    dcc.Store(id='daily-data', storage_type='session'),
+    dcc.Store(id='raw-data', storage_type='memory'),
+    dcc.Store(id='daily-data', storage_type='memory'),
     dcc.Store(id='y2018', storage_type='session'),
     dcc.Store(id='y2019', storage_type='session'),
     dcc.Store(id='y2020', storage_type='session'),
     dcc.Store(id='y2021', storage_type='session'),
 ])
+
+@app.callback([
+    Output('daily-high-high-rank', 'children'),
+    Output('daily-high-low-rank', 'children'),
+    Output('daily-low-high-rank', 'children'),
+    Output('daily-low-low-rank', 'children')],
+    [Input('interval-component-graph', 'n_intervals'),
+    Input('raw-data', 'data')])
+def update_daily_stats(n, data):
+    today = time.strftime("%Y-%m-%d")
+    df = pd.read_json(data)
+    df_s = df
+    df_s['date'] = pd.to_datetime(df_s[0])
+    df_s = df_s.set_index('date')
+    
+    daily_highs = df_s.resample('D').max()
+
+
+
+    total_days = len(daily_highs)
+    print(total_days)
+    daily_high = daily_highs.groupby([daily_highs.index.month, daily_highs.index.day]).idxmax()
+    highest_daily_highs = daily_highs.sort_values(1, ascending=False)
+    lowest_daily_highs = daily_highs.sort_values(1, ascending=True)
+    high_high_rank = highest_daily_highs.index.get_loc(today)+1
+    low_high_rank = lowest_daily_highs.index.get_loc(today)+1
+        
+    daily_lows = df_s.resample('D').min()
+    daily_low = daily_lows.groupby([daily_lows.index.month, daily_lows.index.day]).idxmin()
+    highest_daily_lows = daily_lows.sort_values(1, ascending=True)
+    lowest_daily_lows = daily_lows.sort_values(1, ascending=False)
+    print(lowest_daily_lows.head(30))
+    high_low_rank = highest_daily_lows.index.get_loc(today)+1
+    low_low_rank = lowest_daily_lows.index.get_loc(today)+1
+
+
+
+
+    return html.H6('HH-{}'.format(high_high_rank[0])), html.H6('HL-{}'.format(high_low_rank[0])), html.H6('LH-{}'.format(low_high_rank[0])), html.H6('LL-{}'.format(low_low_rank[0]))
+
+
 
 @app.callback([
     Output('daily-high', 'children'),
@@ -84,7 +167,7 @@ def update_daily_stats(n, daily_data):
     daily_max = daily_df[1].max()
     daily_min = daily_df[1].min()
 
-    return html.H5('High: {:.1f}'.format(daily_max)), html.H5('Low: {:.1f}'.format(daily_min))
+    return html.H6('High: {:.1f}'.format(daily_max)), html.H6('Low: {:.1f}'.format(daily_min))
 
 @app.callback(Output('live-thermometer', 'children'),
               [Input('interval-component', 'n_intervals')])
@@ -94,15 +177,23 @@ def update_layout(n):
     f = ((9.0/5.0) * data) + 32
     return 'Current Temperature: {:.1f}'.format(f)
 
+@app.callback(Output('raw-data', 'data'),
+              [Input('interval-component', 'n_intervals')])
+def update_layout(n):
+    df = pd.read_csv('../../tempjan19.csv', header=None)
+    
+    return df.to_json()
+
 @app.callback([
     Output('daily-data', 'data'),
     Output('y2018', 'data'),
     Output('y2019', 'data'),
     Output('y2020', 'data'),
     Output('y2021', 'data')],
-    [Input('interval-component-graph', 'n_intervals')])
-def process_df_daily(n):
-    df = pd.read_csv('../../tempjan19.csv', header=None)
+    [Input('interval-component-graph', 'n_intervals'),
+    Input('raw-data', 'data')])
+def process_df_daily(n, data):
+    df = pd.read_json(data)
 
     df_stats = df
     df_stats['datetime'] = pd.to_datetime(df_stats[0])
