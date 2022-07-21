@@ -132,11 +132,19 @@ def update_graph(n, raw_data):
     df = df.set_index('datetime')
 
     highs = df.resample('D').max()
-    nineties = highs.loc[highs[1] >= 90]
+    df90 = highs.loc[highs[1] >= 90]
+    df95 = highs.loc[highs[1] >= 95]
 
+    ndds = df90.groupby(df90.index.year).count()
+    nfdds = df95.groupby(df95.index.year).count()
+    print(nfdds)
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+
+    #     print(df90, df95, nfdds)
     # df22dh = df22.resample('D').max()
-    highs = highs.groupby(highs.index.year).max()
-    return(print(nineties))
+    
+    
+    return(print(ndds))
 
 
 
