@@ -78,7 +78,12 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
-                html.H6('Yesterday', style={'color':'white', 'text-align':'center'}),
+                html.H6('90 Degree Days', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div(id='ninety-days', style={'color':'white', 'text-align':'center'}),
             ],
                 className='row'
             ),
@@ -114,7 +119,23 @@ app.layout = html.Div([
     dcc.Store(id='y2019', storage_type='session'),
     dcc.Store(id='y2020', storage_type='session'),
     dcc.Store(id='y2021', storage_type='session'),
+    dcc.Store(id='y2022', storage_type='session'),
 ])
+
+@app.callback(
+    Output('ninety-days', 'children'),
+    [Input('interval-component', 'n_intervals'),
+    Input('daily-data', 'data'),
+    Input('y2018', 'data'),
+    Input('y2019', 'data'),
+    Input('y2020', 'data'),
+    Input('y2021', 'data')])
+def update_graph(n, daily_data, y2018, y2019, y2020, y2021):  
+    df22 = pd.read_json(daily_data)
+
+    return(print(df22.head()))
+
+
 
 @app.callback([
     Output('daily-high-high-rank', 'children'),
@@ -147,8 +168,8 @@ def update_daily_stats(n, data):
     highest_daily_lows = daily_lows.sort_values(1, ascending=True)
     lowest_daily_lows = daily_lows.sort_values(1, ascending=False)
     print(lowest_daily_lows.head(30))
-    high_low_rank = highest_daily_lows.index.get_loc(today)+1
-    low_low_rank = lowest_daily_lows.index.get_loc(today)+1
+    low_low_rank = highest_daily_lows.index.get_loc(today)+1
+    high_low_rank = lowest_daily_lows.index.get_loc(today)+1
 
 
 
@@ -216,6 +237,7 @@ def process_df_daily(n, data):
     df2019 = dfdm[dfdm.index.year == 2019]
     df2020 = dfdm[dfdm.index.year == 2020]
     df2021 = dfdm[dfdm.index.year == 2021]
+    df2022 = dfdm[dfdm.index.year == 2022]
     # print(dfly)
 
     record_high_temps = df_stats.groupby(df_stats.index.strftime('%m-%d')).max()
@@ -249,8 +271,10 @@ def process_df_daily(n, data):
     elif td == 1:
         df_yest = df_stats[(df_stats.index.day == months.get(tm)) & (df_stats.index.month == tm-1) & (df_stats.index.year == ty)]
 
-    return (dfdmy.to_json(), df2018.to_json(), df2019.to_json(), df2020.to_json(), df2021.to_json())
-        
+    return (dfdmy.to_json(), df2018.to_json(), df2019.to_json(), df2020.to_json(), df2021.to_json(), df2022.to_json())
+
+
+
 
 @app.callback(
     Output('live-graph', 'figure'),
