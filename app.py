@@ -125,15 +125,18 @@ app.layout = html.Div([
 @app.callback(
     Output('ninety-days', 'children'),
     [Input('interval-component', 'n_intervals'),
-    Input('daily-data', 'data'),
-    Input('y2018', 'data'),
-    Input('y2019', 'data'),
-    Input('y2020', 'data'),
-    Input('y2021', 'data')])
-def update_graph(n, daily_data, y2018, y2019, y2020, y2021):  
-    df22 = pd.read_json(daily_data)
+    Input('raw-data', 'data')])
+def update_graph(n, raw_data):  
+    df = pd.read_json(raw_data)
+    df['datetime'] = pd.to_datetime(df[0])
+    df = df.set_index('datetime')
 
-    return(print(df22.head()))
+    highs = df.resample('D').max()
+    nineties = highs.loc[highs[1] >= 90]
+
+    # df22dh = df22.resample('D').max()
+    highs = highs.groupby(highs.index.year).max()
+    return(print(nineties))
 
 
 
@@ -167,7 +170,7 @@ def update_daily_stats(n, data):
     daily_low = daily_lows.groupby([daily_lows.index.month, daily_lows.index.day]).idxmin()
     highest_daily_lows = daily_lows.sort_values(1, ascending=True)
     lowest_daily_lows = daily_lows.sort_values(1, ascending=False)
-    print(lowest_daily_lows.head(30))
+    # print(lowest_daily_lows.head(30))
     low_low_rank = highest_daily_lows.index.get_loc(today)+1
     high_low_rank = lowest_daily_lows.index.get_loc(today)+1
 
@@ -210,7 +213,8 @@ def update_layout(n):
     Output('y2018', 'data'),
     Output('y2019', 'data'),
     Output('y2020', 'data'),
-    Output('y2021', 'data')],
+    Output('y2021', 'data'),
+    Output('y2022', 'data')],
     [Input('interval-component-graph', 'n_intervals'),
     Input('raw-data', 'data')])
 def process_df_daily(n, data):
@@ -238,7 +242,7 @@ def process_df_daily(n, data):
     df2020 = dfdm[dfdm.index.year == 2020]
     df2021 = dfdm[dfdm.index.year == 2021]
     df2022 = dfdm[dfdm.index.year == 2022]
-    # print(dfly)
+    # print(df2022)
 
     record_high_temps = df_stats.groupby(df_stats.index.strftime('%m-%d')).max()
     # print(record_high_temps)
