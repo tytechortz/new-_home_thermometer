@@ -83,6 +83,34 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
+                html.Div([
+                   html.Div(id='monthly-high-high-rank', style={'color':'red', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                   html.Div(id='monthly-low-low-rank', style={'color':'dodger-blue', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div([
+                   html.Div(id='monthly-high-low-rank', style={'color':'red', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                   html.Div(id='monthly-low-high-rank', style={'color':'dodger-blue', 'text-align':'center'}), 
+                ],
+                    className='six columns'
+                ),
+            ],
+                className='row'
+            ),
+            html.Div([
                 html.H6('90 Degree Days', style={'color':'white', 'text-align':'center'}),
             ],
                 className='row'
@@ -153,7 +181,44 @@ def update_graph(n, raw_data):
     
     return(print(ndds))
 
+@app.callback([
+    Output('monthly-high-high-rank', 'children'),
+    Output('monthly-high-low-rank', 'children'),
+    Output('monthly-low-high-rank', 'children'),
+    Output('monthly-low-low-rank', 'children')],
+    [Input('interval-component-graph', 'n_intervals'),
+    Input('raw-data', 'data')])
+def update_daily_stats(n, data):
+    today = time.strftime("%Y-%m-%d")
+    df = pd.read_json(data)
+    df_s = df
+    df_s['date'] = pd.to_datetime(df_s[0])
+    df_s = df_s.set_index('date')
+    
+    daily_highs = df_s.resample('D').max()
 
+
+
+    total_days = len(daily_highs)
+    print(total_days)
+    daily_high = daily_highs.groupby([daily_highs.index.month, daily_highs.index.day]).idxmax()
+    highest_daily_highs = daily_highs.sort_values(1, ascending=False)
+    lowest_daily_highs = daily_highs.sort_values(1, ascending=True)
+    high_high_rank = highest_daily_highs.index.get_loc(today)+1
+    low_high_rank = lowest_daily_highs.index.get_loc(today)+1
+        
+    daily_lows = df_s.resample('D').min()
+    daily_low = daily_lows.groupby([daily_lows.index.month, daily_lows.index.day]).idxmin()
+    highest_daily_lows = daily_lows.sort_values(1, ascending=True)
+    lowest_daily_lows = daily_lows.sort_values(1, ascending=False)
+    # print(lowest_daily_lows.head(30))
+    low_low_rank = highest_daily_lows.index.get_loc(today)+1
+    high_low_rank = lowest_daily_lows.index.get_loc(today)+1
+
+
+
+
+    return html.H6('HH-{}'.format(high_high_rank[0])), html.H6('HL-{}'.format(high_low_rank[0])), html.H6('LH-{}'.format(low_high_rank[0])), html.H6('LL-{}'.format(low_low_rank[0]))
 
 @app.callback([
     Output('daily-high-high-rank', 'children'),
