@@ -78,6 +78,11 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
+                html.H6('Monthly Rank', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
                 html.H6('90 Degree Days', style={'color':'white', 'text-align':'center'}),
             ],
                 className='row'
@@ -134,10 +139,12 @@ def update_graph(n, raw_data):
     highs = df.resample('D').max()
     df90 = highs.loc[highs[1] >= 90]
     df95 = highs.loc[highs[1] >= 95]
+    df100 = highs.loc[highs[1] >= 100]
 
     ndds = df90.groupby(df90.index.year).count()
     nfdds = df95.groupby(df95.index.year).count()
-    print(nfdds)
+    hdds = df100.groupby(df100.index.year).count()
+    print(nfdds, hdds)
     # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
 
     #     print(df90, df95, nfdds)
