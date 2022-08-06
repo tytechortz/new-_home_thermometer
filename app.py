@@ -172,7 +172,7 @@ def update_graph(n, raw_data):
     ndds = df90.groupby(df90.index.year).count()
     nfdds = df95.groupby(df95.index.year).count()
     hdds = df100.groupby(df100.index.year).count()
-    print(nfdds, hdds)
+    # print(nfdds, hdds)
     # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
 
     #     print(df90, df95, nfdds)
@@ -194,8 +194,13 @@ def update_daily_stats(n, data):
     df_s = df
     df_s['date'] = pd.to_datetime(df_s[0])
     df_s = df_s.set_index('date')
+    current_month = dt.now().month
+    print(current_month)
     
     daily_highs = df_s.resample('D').max()
+    df1 = daily_highs[daily_highs.index.month == current_month]
+    print(df1)
+    # print(daily_highs)
 
 
 
