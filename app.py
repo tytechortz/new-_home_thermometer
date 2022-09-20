@@ -140,7 +140,16 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
-                html.Div(id='month-high-low', style={'color':'white', 'text-align':'center'}),
+                html.Div([
+                    html.Div(id='monthly-high', style={'color':'white', 'text-align':'center'}),
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                    html.Div(id='monthly-low', style={'color':'white', 'text-align':'center'}),
+                ],
+                    className='six columns'
+                ),
             ],
                 className='row'
             ),
@@ -181,26 +190,36 @@ app.layout = html.Div([
 
 @app.callback([
     Output('monthly-record-high', 'children'),
-    Output('monthly-record-low', 'children')],
+    Output('monthly-record-low', 'children'),
+    Output('monthly-high', 'children'),
+    Output('monthly-low', 'children')],
     [Input('interval-component', 'n_intervals'),
     Input('raw-data', 'data')])
 def update_graph(n, raw_data):  
     df = pd.read_json(raw_data)
-    print(df)
+    # print(df)
     df['datetime'] = pd.to_datetime(df[0])
     df = df.set_index('datetime')
 
     # highs = df.resample('M').max()
     # print(highs)
     tm = dt.now().month
+    ty = dt.now().year
     dfm = df[df.index.month == tm]
     dfm = dfm.drop(0, axis=1)
-    print(dfm)
+    # print(dfm)
     mrh = dfm.groupby(dfm.index.month).max()
     mrh = mrh.iloc[0][1]
-    print(mrh)
+    # print(mrh)
     mrl = dfm.groupby(dfm.index.month).min()
     mrl = mrl.iloc[0][1]
+
+    dfmy = dfm[dfm.index.year == ty]
+    print(dfmy)
+    monthly_high = dfmy.groupby(dfmy.index.month).max()
+    monthly_high = monthly_high.iloc[0][1]
+    monthly_low = dfmy.groupby(dfmy.index.month).min()
+    print(monthly_low)
     # df90 = highs.loc[highs[1] >= 90]
     # df95 = highs.loc[highs[1] >= 95]
     # df100 = highs.loc[highs[1] >= 100]
@@ -215,7 +234,7 @@ def update_graph(n, raw_data):
     # df22dh = df22.resample('D').max()
     
     
-    return html.H6('High: {:.1f}'.format(mrh)), html.H6('Low: {:.1f}'.format(mrl))
+    return html.H6('High: {:.1f}'.format(mrh)), html.H6('Low: {:.1f}'.format(mrl)), html.H6('HighH: {:.1f}'.format(monthly_high)), html.H6('LowL: {:.1f}'.format(mrl))
 
 @app.callback(
     Output('ninety-days', 'children'),
