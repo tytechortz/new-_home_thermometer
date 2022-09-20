@@ -143,12 +143,12 @@ app.layout = html.Div([
                 html.Div([
                     html.Div(id='monthly-high', style={'color':'white', 'text-align':'center'}),
                 ],
-                    className='six columns'
+                    className='five columns'
                 ),
                 html.Div([
                     html.Div(id='monthly-high-date', style={'color':'white', 'text-align':'center'}),
                 ],
-                    className='six columns'
+                    className='seven columns'
                 ),
             ],
                 className='row'
@@ -157,12 +157,12 @@ app.layout = html.Div([
                 html.Div([
                     html.Div(id='monthly-low', style={'color':'white', 'text-align':'center'}),
                 ],
-                    className='six columns'
+                    className='five columns'
                 ),
                 html.Div([
                     html.Div(id='monthly-low-date', style={'color':'white', 'text-align':'center'}),
                 ],
-                    className='six columns'
+                    className='seven columns'
                 ),
             ],
                 className='row'
@@ -235,6 +235,7 @@ def update_graph(n, raw_data):
     monthly_high = dfmy.groupby(dfmy.index.month).max()
     monthly_high = monthly_high.iloc[0][1]
     monthly_high_date = dfmy.groupby(dfmy.index.month).idxmax()
+    monthly_high_date = monthly_high_date.iloc[0][1]
     monthly_low = dfmy.groupby(dfmy.index.month).min()
     monthly_low = monthly_low.iloc[0][1]
     monthly_low_date = dfmy.groupby(dfmy.index.month).idxmin()
@@ -254,7 +255,7 @@ def update_graph(n, raw_data):
     # df22dh = df22.resample('D').max()
     
     
-    return html.H6('High: {:.1f}'.format(mrh)), html.H6('Low: {:.1f}'.format(mrl)), html.H6('HighH: {:.1f}'.format(monthly_high)), html.H6('LowL: {:.1f}'.format(monthly_low)), html.H6('Date: {}'.format(monthly_high_date)), html.H6('Date: {}'.format(monthly_low_date))
+    return html.H6('High: {:.1f}'.format(mrh)), html.H6('Low: {:.1f}'.format(mrl)), html.H6('High: {:.1f}'.format(monthly_high)), html.H6('Low: {:.1f}'.format(monthly_low)), html.H6('{}'.format(monthly_high_date)), html.H6('{}'.format(monthly_low_date))
 
 @app.callback(
     Output('ninety-days', 'children'),
