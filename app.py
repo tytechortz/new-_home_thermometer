@@ -135,7 +135,12 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
-                html.Div(id='ninety-days', style={'color':'white', 'text-align':'center'}),
+                html.H6('Monthly High - Low', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div(id='month-high-low', style={'color':'white', 'text-align':'center'}),
             ],
                 className='row'
             ),
