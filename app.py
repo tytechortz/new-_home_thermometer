@@ -219,7 +219,8 @@ def update_graph(n, raw_data):
     monthly_high = dfmy.groupby(dfmy.index.month).max()
     monthly_high = monthly_high.iloc[0][1]
     monthly_low = dfmy.groupby(dfmy.index.month).min()
-    print(monthly_low)
+    monthly_low_date = dfmy.groupby(dfmy.index.month).idxmin()
+    print(monthly_low_date)
     # df90 = highs.loc[highs[1] >= 90]
     # df95 = highs.loc[highs[1] >= 95]
     # df100 = highs.loc[highs[1] >= 100]
