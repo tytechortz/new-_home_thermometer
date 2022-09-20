@@ -116,7 +116,21 @@ app.layout = html.Div([
                 className='row'
             ),
             html.Div([
-                html.Div(id='monthly-records', style={'color':'white', 'text-align':'center'}),
+                html.H6('Monthly Records', style={'color':'white', 'text-align':'center'}),
+            ],
+                className='row'
+            ),
+            html.Div([
+                html.Div([
+                    html.Div(id='monthly-record-high', style={'color':'white', 'text-align':'center'}),
+                ],
+                    className='six columns'
+                ),
+                html.Div([
+                    html.Div(id='monthly-record-low', style={'color':'white', 'text-align':'center'}),
+                ],
+                    className='six columns'
+                ),
             ],
                 className='row'
             ),
@@ -160,12 +174,14 @@ app.layout = html.Div([
     dcc.Store(id='y2022', storage_type='session'),
 ])
 
-@app.callback(
-    Output('monthly-records', 'children'),
+@app.callback([
+    Output('monthly-record-high', 'children'),
+    Output('monthly-record-low', 'children')],
     [Input('interval-component', 'n_intervals'),
     Input('raw-data', 'data')])
 def update_graph(n, raw_data):  
     df = pd.read_json(raw_data)
+    print(df)
     df['datetime'] = pd.to_datetime(df[0])
     df = df.set_index('datetime')
 
@@ -176,8 +192,10 @@ def update_graph(n, raw_data):
     dfm = dfm.drop(0, axis=1)
     print(dfm)
     mrh = dfm.groupby(dfm.index.month).max()
-    # mrh = dfm.max()
+    mrh = mrh.iloc[0][1]
     print(mrh)
+    mrl = dfm.groupby(dfm.index.month).min()
+    mrl = mrl.iloc[0][1]
     # df90 = highs.loc[highs[1] >= 90]
     # df95 = highs.loc[highs[1] >= 95]
     # df100 = highs.loc[highs[1] >= 100]
@@ -192,7 +210,7 @@ def update_graph(n, raw_data):
     # df22dh = df22.resample('D').max()
     
     
-    return html.H6('HH-{}'.format(mrh))
+    return html.H6('High: {:.1f}'.format(mrh)), html.H6('Low: {:.1f}'.format(mrl))
 
 @app.callback(
     Output('ninety-days', 'children'),
